@@ -1,6 +1,7 @@
 import React from "react"
 import PropTypes from "prop-types"
 import ImPropTypes from "react-immutable-proptypes"
+import {stringify} from "../utils";
 
 export default class ModelExample extends React.Component {
   static propTypes = {
@@ -8,6 +9,7 @@ export default class ModelExample extends React.Component {
     specSelectors: PropTypes.object.isRequired,
     schema: PropTypes.object.isRequired,
     example: PropTypes.any.isRequired,
+    exampleForm: PropTypes.any,
     isExecute: PropTypes.bool,
     getConfigs: PropTypes.func.isRequired,
     specPath: ImPropTypes.list.isRequired,
@@ -52,7 +54,7 @@ export default class ModelExample extends React.Component {
   }
 
   render() {
-    let { getComponent, specSelectors, schema, example, isExecute, getConfigs, specPath } = this.props
+    let { getComponent, specSelectors, schema, example, exampleForm, isExecute, getConfigs, specPath } = this.props
     let { defaultModelExpandDepth } = getConfigs()
     const ModelWrapper = getComponent("ModelWrapper")
     const HighlightCode = getComponent("highlightCode")
@@ -64,6 +66,9 @@ export default class ModelExample extends React.Component {
         <li className={ "tabitem" + ( this.state.activeTab === "example" ? " active" : "") }>
           <a className="tablinks" data-name="example" onClick={ this.activeTab }>{isExecute ? "Edit Value" : "Example Value"}</a>
         </li>
+        <li className={ "tabitem second " + ( this.state.activeTab === "example-form" ? " active" : "") }>
+          <a className="tablinks" data-name="example-form" onClick={ this.activeTab }>{isExecute ? "Edit Form" : "Form (readonly)"}</a>
+        </li>
         { schema ? <li className={ "tabitem" + ( this.state.activeTab === "model" ? " active" : "") }>
           <a className={ "tablinks" + ( isExecute ? " inactive" : "" )} data-name="model" onClick={ this.activeTab }>
             {isOAS3 ? "Schema" : "Model" }
@@ -74,6 +79,13 @@ export default class ModelExample extends React.Component {
         {
           this.state.activeTab === "example" ? (
             example ? example : (
+              <HighlightCode value="(no example available)" />
+            )
+          ) : null
+        }
+        {
+          this.state.activeTab === "example-form" ? (
+            exampleForm ? exampleForm : (
               <HighlightCode value="(no example available)" />
             )
           ) : null

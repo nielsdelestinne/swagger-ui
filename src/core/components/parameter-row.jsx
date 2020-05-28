@@ -1,9 +1,9 @@
-import React, { Component } from "react"
-import { Map, List } from "immutable"
+import React, {Component} from "react"
+import {Map, List} from "immutable"
 import PropTypes from "prop-types"
 import ImPropTypes from "react-immutable-proptypes"
 import win from "core/window"
-import { getSampleSchema, getExtensions, getCommonExtensions, numberToString, stringify } from "core/utils"
+import {getSampleSchema, getExtensions, getCommonExtensions, numberToString, stringify} from "core/utils"
 import getParameterSchema from "../../helpers/get-parameter-schema.js"
 
 export default class ParameterRow extends Component {
@@ -31,7 +31,7 @@ export default class ParameterRow extends Component {
   }
 
   componentWillReceiveProps(props) {
-    let { specSelectors, pathMethod, rawParam } = props
+    let {specSelectors, pathMethod, rawParam} = props
     let isOAS3 = specSelectors.isOAS3()
 
     let parameterWithMeta = specSelectors.parameterWithMetaByIdentity(pathMethod, rawParam) || new Map()
@@ -40,8 +40,8 @@ export default class ParameterRow extends Component {
 
     let enumValue
 
-    if(isOAS3) {
-      let { schema } = getParameterSchema(parameterWithMeta, { isOAS3 })
+    if (isOAS3) {
+      let {schema} = getParameterSchema(parameterWithMeta, {isOAS3})
       enumValue = schema ? schema.get("enum") : undefined
     } else {
       enumValue = parameterWithMeta ? parameterWithMeta.get("enum") : undefined
@@ -50,13 +50,13 @@ export default class ParameterRow extends Component {
 
     let value
 
-    if ( paramValue !== undefined ) {
+    if (paramValue !== undefined) {
       value = paramValue
-    } else if ( rawParam.get("required") && enumValue && enumValue.size ) {
+    } else if (rawParam.get("required") && enumValue && enumValue.size) {
       value = enumValue.first()
     }
 
-    if ( value !== undefined && value !== paramValue ) {
+    if (value !== undefined && value !== paramValue) {
       this.onChangeWrapper(numberToString(value))
     }
     // todo: could check if schema here; if not, do not call. impact?
@@ -64,11 +64,11 @@ export default class ParameterRow extends Component {
   }
 
   onChangeWrapper = (value, isXml = false) => {
-    let { onChange, rawParam } = this.props
+    let {onChange, rawParam} = this.props
     let valueForUpstream
 
     // Coerce empty strings and empty Immutable objects to null
-    if(value === "" || (value && value.size === 0)) {
+    if (value === "" || (value && value.size === 0)) {
       valueForUpstream = null
     } else {
       valueForUpstream = value
@@ -87,22 +87,22 @@ export default class ParameterRow extends Component {
   }
 
   onChangeIncludeEmpty = (newValue) => {
-    let { specActions, param, pathMethod } = this.props
+    let {specActions, param, pathMethod} = this.props
     const paramName = param.get("name")
     const paramIn = param.get("in")
     return specActions.updateEmptyParamInclusion(pathMethod, paramName, paramIn, newValue)
   }
 
   setDefaultValue = () => {
-    let { specSelectors, pathMethod, rawParam, oas3Selectors } = this.props
+    let {specSelectors, pathMethod, rawParam, oas3Selectors} = this.props
 
     const paramWithMeta = specSelectors.parameterWithMetaByIdentity(pathMethod, rawParam) || Map()
-    const { schema } = getParameterSchema(paramWithMeta, { isOAS3: specSelectors.isOAS3() })
+    const {schema} = getParameterSchema(paramWithMeta, {isOAS3: specSelectors.isOAS3()})
     const parameterMediaType = paramWithMeta
       .get("content", Map())
       .keySeq()
       .first()
-    
+
     // getSampleSchema could return null
     const generatedSampleValue = schema ? getSampleSchema(schema.toJS(), parameterMediaType, {
       includeWriteOnly: true
@@ -112,7 +112,7 @@ export default class ParameterRow extends Component {
       return
     }
 
-    if( paramWithMeta.get("in") !== "body" ) {
+    if (paramWithMeta.get("in") !== "body") {
       let initialValue
 
       //// Find an initial value
@@ -133,18 +133,18 @@ export default class ParameterRow extends Component {
 
       //// Process the initial value
 
-      if(initialValue !== undefined && !List.isList(initialValue)) {
+      if (initialValue !== undefined && !List.isList(initialValue)) {
         // Stringify if it isn't a List
         initialValue = stringify(initialValue)
       }
 
       //// Dispatch the initial value
 
-      if(initialValue !== undefined) {
+      if (initialValue !== undefined) {
         this.onChangeWrapper(initialValue)
-      } else if(
+      } else if (
         schema && schema.get("type") === "object"
-        && generatedSampleValue 
+        && generatedSampleValue
         && !paramWithMeta.get("examples")
       ) {
         // Object parameters get special treatment.. if the user doesn't set any
@@ -164,9 +164,9 @@ export default class ParameterRow extends Component {
   }
 
   getParamKey() {
-    const { param } = this.props
+    const {param} = this.props
 
-    if(!param) return null
+    if (!param) return null
 
     return `${param.get("name")}-${param.get("in")}`
   }
@@ -176,29 +176,42 @@ export default class ParameterRow extends Component {
 
     let isOAS3 = specSelectors.isOAS3()
 
-    const { showExtensions, showCommonExtensions } = getConfigs()
+    const {showExtensions, showCommonExtensions} = getConfigs()
 
-    if(!param) {
+    if (!param) {
       param = rawParam
     }
 
-    if(!rawParam) return null
+    if (!rawParam) return null
 
     // const onChangeWrapper = (value) => onChange(param, value)
     const JsonSchemaForm = getComponent("JsonSchemaForm")
     const ParamBody = getComponent("ParamBody")
+    const ParamBodyForm = getComponent("ParamBodyForm")
     let inType = param.get("in")
     let bodyParam = inType !== "body" ? null
       : <ParamBody getComponent={getComponent}
                    fn={fn}
                    param={param}
-                   consumes={ specSelectors.consumesOptionsFor(pathMethod) }
-                   consumesValue={ specSelectors.contentTypeValues(pathMethod).get("requestContentType") }
+                   consumes={specSelectors.consumesOptionsFor(pathMethod)}
+                   consumesValue={specSelectors.contentTypeValues(pathMethod).get("requestContentType")}
                    onChange={this.onChangeWrapper}
                    onChangeConsumes={onChangeConsumes}
-                   isExecute={ isExecute }
-                   specSelectors={ specSelectors }
-                   pathMethod={ pathMethod }
+                   isExecute={isExecute}
+                   specSelectors={specSelectors}
+                   pathMethod={pathMethod}
+      />
+    let bodyParamForm = inType !== "body" ? null
+      : <ParamBodyForm getComponent={getComponent}
+                       fn={fn}
+                       param={param}
+                       consumes={specSelectors.consumesOptionsFor(pathMethod)}
+                       consumesValue={specSelectors.contentTypeValues(pathMethod).get("requestContentType")}
+                       onChange={this.onChangeWrapper}
+                       onChangeConsumes={onChangeConsumes}
+                       isExecute={isExecute}
+                       specSelectors={specSelectors}
+                       pathMethod={pathMethod}
       />
 
     const ModelExample = getComponent("modelExample")
@@ -208,7 +221,7 @@ export default class ParameterRow extends Component {
     const ExamplesSelectValueRetainer = getComponent("ExamplesSelectValueRetainer")
     const Example = getComponent("Example")
 
-    let { schema } = getParameterSchema(param, { isOAS3 })
+    let {schema} = getParameterSchema(param, {isOAS3})
     let paramWithMeta = specSelectors.parameterWithMetaByIdentity(pathMethod, rawParam) || Map()
 
     let format = schema ? schema.get("format") : null
@@ -228,7 +241,7 @@ export default class ParameterRow extends Component {
     let paramExample // undefined
     let isDisplayParamEnum = false
 
-    if ( param !== undefined && schema ) {
+    if (param !== undefined && schema) {
       paramItems = schema.get("items")
     }
 
@@ -239,12 +252,12 @@ export default class ParameterRow extends Component {
       paramEnum = schema.get("enum")
     }
 
-    if ( paramEnum && paramEnum.size && paramEnum.size > 0) {
+    if (paramEnum && paramEnum.size && paramEnum.size > 0) {
       isDisplayParamEnum = true
     }
 
     // Default and Example Value for readonly doc
-    if ( param !== undefined ) {
+    if (param !== undefined) {
       if (schema) {
         paramDefaultValue = schema.get("default")
       }
@@ -261,34 +274,37 @@ export default class ParameterRow extends Component {
       <tr data-param-name={param.get("name")} data-param-in={param.get("in")}>
         <td className="parameters-col_name">
           <div className={required ? "parameter__name required" : "parameter__name"}>
-            { param.get("name") }
-            { !required ? null : <span style={{color: "red"}}>&nbsp;*</span> }
+            {param.get("name")}
+            {!required ? null : <span style={{color: "red"}}>&nbsp;*</span>}
           </div>
           <div className="parameter__type">
-            { type }
-            { itemType && `[${itemType}]` }
-            { format && <span className="prop-format">(${format})</span>}
+            {type}
+            {itemType && `[${itemType}]`}
+            {format && <span className="prop-format">(${format})</span>}
           </div>
           <div className="parameter__deprecated">
-            { isOAS3 && param.get("deprecated") ? "deprecated": null }
+            {isOAS3 && param.get("deprecated") ? "deprecated" : null}
           </div>
-          <div className="parameter__in">({ param.get("in") })</div>
-          { !showCommonExtensions || !commonExt.size ? null : commonExt.map((v, key) => <ParameterExt key={`${key}-${v}`} xKey={key} xVal={v} /> )}
-          { !showExtensions || !extensions.size ? null : extensions.map((v, key) => <ParameterExt key={`${key}-${v}`} xKey={key} xVal={v} /> )}
+          <div className="parameter__in">({param.get("in")})</div>
+          {!showCommonExtensions || !commonExt.size ? null : commonExt.map((v, key) => <ParameterExt key={`${key}-${v}`}
+                                                                                                     xKey={key}
+                                                                                                     xVal={v}/>)}
+          {!showExtensions || !extensions.size ? null : extensions.map((v, key) => <ParameterExt key={`${key}-${v}`}
+                                                                                                 xKey={key} xVal={v}/>)}
         </td>
 
         <td className="parameters-col_description">
-          { param.get("description") ? <Markdown source={ param.get("description") }/> : null }
+          {param.get("description") ? <Markdown source={param.get("description")}/> : null}
 
-          { (bodyParam || !isExecute) && isDisplayParamEnum ?
+          {(bodyParam || !isExecute) && isDisplayParamEnum ?
             <Markdown className="parameter__enum" source={
-                "<i>Available values</i> : " + paramEnum.map(function(item) {
-                    return item
-                  }).toArray().join(", ")}/>
+              "<i>Available values</i> : " + paramEnum.map(function (item) {
+                return item
+              }).toArray().join(", ")}/>
             : null
           }
 
-          { (bodyParam || !isExecute) && paramDefaultValue !== undefined ?
+          {(bodyParam || !isExecute) && paramDefaultValue !== undefined ?
             <Markdown className="parameter__default" source={"<i>Default value</i> : " + paramDefaultValue}/>
             : null
           }
@@ -311,38 +327,39 @@ export default class ParameterRow extends Component {
             ) : null
           }
 
-          { bodyParam ? null
+          {bodyParam ? null
             : <JsonSchemaForm fn={fn}
                               getComponent={getComponent}
-                              value={ value }
-                              required={ required }
+                              value={value}
+                              required={required}
                               disabled={!isExecute}
                               description={param.get("description") ? `${param.get("name")} - ${param.get("description")}` : `${param.get("name")}`}
-                              onChange={ this.onChangeWrapper }
-                              errors={ paramWithMeta.get("errors") }
-                              schema={ schema }/>
+                              onChange={this.onChangeWrapper}
+                              errors={paramWithMeta.get("errors")}
+                              schema={schema}/>
           }
 
 
           {
-            bodyParam && schema ? <ModelExample getComponent={ getComponent }
+            bodyParam && schema ? <ModelExample getComponent={getComponent}
                                                 specPath={specPath.push("schema")}
-                                                getConfigs={ getConfigs }
-                                                isExecute={ isExecute }
-                                                specSelectors={ specSelectors }
-                                                schema={ schema }
-                                                example={ bodyParam }/>
+                                                getConfigs={getConfigs}
+                                                isExecute={isExecute}
+                                                specSelectors={specSelectors}
+                                                schema={schema}
+                                                example={bodyParam}
+                                                exampleForm={bodyParamForm}/>
               : null
           }
 
           {
             !bodyParam && isExecute ?
-            <ParameterIncludeEmpty
-              onChange={this.onChangeIncludeEmpty}
-              isIncluded={specSelectors.parameterInclusionSettingFor(pathMethod, param.get("name"), param.get("in"))}
-              isDisabled={value && value.size !== 0}
-              param={param} />
-            : null
+              <ParameterIncludeEmpty
+                onChange={this.onChangeIncludeEmpty}
+                isIncluded={specSelectors.parameterInclusionSettingFor(pathMethod, param.get("name"), param.get("in"))}
+                isDisabled={value && value.size !== 0}
+                param={param}/>
+              : null
           }
 
           {

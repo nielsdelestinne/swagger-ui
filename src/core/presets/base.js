@@ -63,6 +63,7 @@ import JumpToPath from "core/components/jump-to-path"
 import Footer from "core/components/footer"
 import FilterContainer from "core/containers/filter"
 import ParamBody from "core/components/param-body"
+import ParamBodyForm from "core/components/param-body-form"
 import Curl from "core/components/curl"
 import Schemes from "core/components/schemes"
 import SchemesContainer from "core/containers/schemes"
@@ -130,6 +131,7 @@ export default function() {
       footer: Footer,
       FilterContainer,
       ParamBody: ParamBody,
+      ParamBodyForm: ParamBodyForm,
       curl: Curl,
       schemes: Schemes,
       SchemesContainer,
@@ -159,8 +161,8 @@ export default function() {
       InfoBasePath,
       SvgAssets,
       Example,
-      ExamplesSelect,
       ExamplesSelectValueRetainer,
+      ExamplesSelect,
     }
   }
 
